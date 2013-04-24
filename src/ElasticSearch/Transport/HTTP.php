@@ -29,31 +29,29 @@ class HTTP extends Base {
     protected $ch;
 	
 	
-    public function __construct($host='localhost', $port=9200) {
-        parent::__construct($host, $port);
+    public function __construct($host='localhost', $port=9200, $authentication=null) {
+        parent::__construct($host, $port, $authentication);
         $this->ch = curl_init();
     }
-
+    
     /**
      * Index a new document or update it if existing
      *
      * @return array
      * @param array $document
      * @param mixed $id Optional
-     * @param array $options
      */
     public function index($document, $id=false, array $options = array()) {
         $url = $this->buildUrl(array($this->type, $id), $options);
         $method = ($id == false) ? "POST" : "PUT";
         return $this->call($url, $method, $document);
     }
-
+    
     /**
      * Search
      *
      * @return array
-     * @param array|string $query
-     * @param array $options
+     * @param mixed $id Optional
      */
     public function search($query, array $options = array()) {
         if (is_array($query)) {
@@ -76,12 +74,12 @@ class HTTP extends Base {
         }
         return $result;
     }
-
+    
     /**
      * Search
      *
      * @return array
-     * @param mixed $query
+     * @param mixed $id Optional
      * @param array $options Parameters to pass to delete action
      */
     public function deleteByQuery($query, array $options = array()) {
@@ -107,7 +105,7 @@ class HTTP extends Base {
         }
         return !isset($result['error']) && $result['ok'];
     }
-
+    
     /**
      * Perform a request against the given path/method/payload combination
      * Example:
@@ -115,7 +113,7 @@ class HTTP extends Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
+     * @param array|false $payload
      * @return array
      */
     public function request($path, $method="GET", $payload=false) {
@@ -135,20 +133,23 @@ class HTTP extends Base {
         else
             return $this->request(false, "DELETE");
     }
-
+    
     /**
      * Perform a http call against an url with an optional payload
      *
      * @return array
      * @param string $url
      * @param string $method (GET/POST/PUT/DELETE)
-     * @param array|bool $payload The document/instructions to pass along
-     * @throws HTTPException
+     * @param array $payload The document/instructions to pass along
      */
     protected function call($url, $method="GET", $payload=false) {
         $conn = $this->ch;
         $protocol = "http";
+        
         $requestURL = $protocol . "://" . $this->host . $url;
+        
+        if($this->authentication) curl_setopt($conn, CURLOPT_USERPWD, "nginx:nginx7505");          
+        
         curl_setopt($conn, CURLOPT_URL, $requestURL);
         curl_setopt($conn, CURLOPT_TIMEOUT, self::TIMEOUT);
         curl_setopt($conn, CURLOPT_PORT, $this->port);

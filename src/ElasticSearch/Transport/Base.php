@@ -36,15 +36,22 @@ abstract class Base {
      * @var string
      */
     protected $type;
-
+    
+    /**
+     * ElasticSearch authentication
+     * @var string
+     */
+    protected $authentication;
+    
     /**
      * Default constructor, just set host and port
      * @param string $host
      * @param int $port
      */
-    public function __construct($host, $port) {
+    public function __construct($host, $port, $authentication) {
         $this->host = $host;
         $this->port = $port;
+        $this->authentication = $authentication;
     }
 
     /**
@@ -63,8 +70,7 @@ abstract class Base {
      *
      * @param string|array $path
      * @param string $method
-     * @param array|bool $payload
-     * @return
+     * @param array|false $payload
      */
     abstract public function request($path, $method="GET", $payload=false);
 
@@ -79,17 +85,16 @@ abstract class Base {
      * @param array|string $query
      */
     abstract public function search($query);
-
+    
     /**
      * Search
      *
      * @return array
      * @param mixed $query String or array to use as criteria for delete
      * @param array $options Parameters to pass to delete action
-     * @throws \Elasticsearch\Exception
      */
     public function deleteByQuery($query, array $options = array()) {
-        throw new \Elasticsearch\Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
+        throw new Exception(__FUNCTION__ . ' not implemented for ' . __CLASS__);
     }
 
     /**
@@ -109,10 +114,18 @@ abstract class Base {
     }
 
     /**
+     * Set authentication
+     * @param string $authentication
+     */
+    public function setAuthentication($authentication) {
+        $this->authentication = $authentication;
+    }
+    
+    /**
      * Build a callable url
      *
      * @return string
-     * @param array|bool $path
+     * @param array $path
      * @param array $options Query parameter options to pass
      */
     protected function buildUrl($path = false, array $options = array()) {
