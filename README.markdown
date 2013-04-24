@@ -80,7 +80,8 @@ $es = Client::connection(array(
     'servers' => '127.0.0.1:9200',
     'protocol' => 'http',
     'index' => 'myindex',
-    'type' => 'mytype'
+    'type' => 'mytype',
+    'authentication' => 'login:password'
 ));
 ```
 
